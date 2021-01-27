@@ -28,8 +28,8 @@ t.data$AcadRank[which(t.data$AcadRank == 20)] <- 5  # A/Prof
 t.data$AcadRank[which(t.data$AcadRank == 30)] <- 4  # Asst P
 t.data$AcadRank[which(t.data$AcadRank == 40)] <- 3  # lecturer
 t.data$AcadRank[which(t.data$AcadRank == 50)] <- 2  # visiting
-t.data$AcadRank[which(t.data$AcadRank == 60)] <- 1  # pre-prof
-t.data$AcadRank[which(t.data$AcadRank == 70)] <- 1  # pre-prof
+t.data$AcadRank[which(t.data$AcadRank == 60)] <- 1  # pre-prof (post-doc)
+t.data$AcadRank[which(t.data$AcadRank == 70)] <- 1  # pre-prof (grad student)
 
 rank.names <- c("PreProf", "Visit.", "Lecture", "Asst. P", "A/Prof", "Prof")
 
@@ -75,7 +75,7 @@ MakeTECItable <- function(dataset) {
         pat.freq <- table(dataset$CoordPattern)
         top.3 <- dimnames(pat.freq[order(pat.freq, decreasing = T)])[[1]][1:3]
         top.3.n <- pat.freq[order(pat.freq, decreasing = TRUE)[1:3]]
-        top.3.eng <- paste("Top 3: ", top.3[1], " (n=", top.3.n[1], "), ", top.3[2], " (n=", top.3.n[2], "), ", top.3[3], " (n=", top.3.n[3], ")", sep = "")
+        top.3.eng <- paste(top.3[1], " (n=", top.3.n[1], "), ", top.3[2], " (n=", top.3.n[2], "), ", top.3[3], " (n=", top.3.n[3], ")", sep = "")
         TECIbox <- list(N, perRBIS, top.3.eng)
         return(TECIbox)        
         
@@ -86,3 +86,5 @@ MakeTECItable(inst.3)
 MakeTECItable(inst.2)
 MakeTECItable(inst.1)
 ```
+
+
