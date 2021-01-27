@@ -125,7 +125,32 @@ CoordPatterns <- c("1[123][123][123]", "2[123][123][123]", "3[123][123][123]",
 for (pat in 1:length(CoordPatterns)){ # calculate mean for each pattern
         for(n in 1:100) {  # randomize RBIS use
                 test.data$Rand <- sample(test.data$RBISuse)  
-                test.sub <- test.data[which(test.data$Discipline == 1), ] # subset by physics
+                test.sub <- test.data[which(test.data$Discipline == 1), ] # subset by discipline (1 = chemistry, 2 = math, 3 = physics)
+                test.sub <- test.sub[str_which(test.sub$CoordPattern, CoordPatterns[pat]), ] 
+                r.per[n] <- ((length(which(test.sub$Rand == 2)) / dim(test.sub)[1]) * 100)  # % RBIS in that cell for n randomization
+        }
+        t.result <- t.test(r.per, conf.level = 0.999)
+        conf.table[pat, 2] <- mean(r.per)
+        conf.table[pat, 3] <- t.result$conf.int[1]
+        conf.table[pat, 4] <- t.result$conf.int[2]
+}
+```
+
+## Test 100 randomizations withIN disciplines
+```{r}
+r.per <- vector("numeric", length = 100)
+conf.table <- data.frame(cell = 1:12, mean = 0, low = 0, high = 0)
+test.data <- t.data[complete.cases(t.data$RBISuse), ]
+CoordPatterns <- c("1[123][123][123]", "2[123][123][123]", "3[123][123][123]",
+                   "[123]1[123][123]", "[123]2[123][123]", "[123]3[123][123]",
+                   "[123][123]1[123]", "[123][123]2[123]", "[123][123]3[123]",
+                   "[123][123][123]1", "[123][123][123]2", "[123][123][123]3")
+
+# Calculate standard deviation (alpha = 0.001) for table of one discipline (specify by 1, 2, or 3 on 4th line:)
+for (pat in 1:length(CoordPatterns)){ # calculate mean for each pattern
+        for(n in 1:100) {  # randomize RBIS use
+                test.sub <- test.data[which(test.data$Discipline == 3), ] # subset by discipline (1 = chemistry, 2 = math, 3 = physics)
+                test.sub$Rand <- sample(test.sub$RBISuse) 
                 test.sub <- test.sub[str_which(test.sub$CoordPattern, CoordPatterns[pat]), ] 
                 r.per[n] <- ((length(which(test.sub$Rand == 2)) / dim(test.sub)[1]) * 100)  # % RBIS in that cell for n randomization
         }
