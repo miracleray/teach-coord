@@ -40,25 +40,25 @@ t.data$CoordPattern <- as.character(raw$CoordPattern)
 ```{r}
 u.coords <- unique(t.data$CoordPattern) 
 
-# Subset to just chemistry
-tc.data <- t.data[which(t.data$Discipline == 3), ]
+# Subset by discipline [optional]
+t.data <- t.data[which(t.data$Discipline == 3), ]
 
 # Subset the datasets
-text.1 <- tc.data[str_which(tc.data$CoordPattern, "1[123][123][123]"), ]  # solo
-text.2 <- tc.data[str_which(tc.data$CoordPattern, "2[123][123][123]"), ]  # coll
-text.3 <- tc.data[str_which(tc.data$CoordPattern, "3[123][123][123]"), ]  # cont
+text.1 <- t.data[str_which(t.data$CoordPattern, "1[123][123][123]"), ]  # solo
+text.2 <- t.data[str_which(t.data$CoordPattern, "2[123][123][123]"), ]  # coll
+text.3 <- t.data[str_which(t.data$CoordPattern, "3[123][123][123]"), ]  # cont
 
-exam.1 <- tc.data[str_which(tc.data$CoordPattern, "[123]1[123][123]"), ]  # solo
-exam.2 <- tc.data[str_which(tc.data$CoordPattern, "[123]2[123][123]"), ]  # coll
-exam.3 <- tc.data[str_which(tc.data$CoordPattern, "[123]3[123][123]"), ]  # cont
+exam.1 <- t.data[str_which(t.data$CoordPattern, "[123]1[123][123]"), ]  # solo
+exam.2 <- t.data[str_which(t.data$CoordPattern, "[123]2[123][123]"), ]  # coll
+exam.3 <- t.data[str_which(t.data$CoordPattern, "[123]3[123][123]"), ]  # cont
 
-cont.1 <- tc.data[str_which(tc.data$CoordPattern, "[123][123]1[123]"), ]  # solo
-cont.2 <- tc.data[str_which(tc.data$CoordPattern, "[123][123]2[123]"), ]  # coll
-cont.3 <- tc.data[str_which(tc.data$CoordPattern, "[123][123]3[123]"), ]  # cont
+cont.1 <- t.data[str_which(t.data$CoordPattern, "[123][123]1[123]"), ]  # solo
+cont.2 <- t.data[str_which(t.data$CoordPattern, "[123][123]2[123]"), ]  # coll
+cont.3 <- t.data[str_which(t.data$CoordPattern, "[123][123]3[123]"), ]  # cont
 
-inst.1 <- tc.data[str_which(tc.data$CoordPattern, "[123][123][123]1"), ]  # solo
-inst.2 <- tc.data[str_which(tc.data$CoordPattern, "[123][123][123]2"), ]  # coll
-inst.3 <- tc.data[str_which(tc.data$CoordPattern, "[123][123][123]3"), ]  # cont
+inst.1 <- t.data[str_which(t.data$CoordPattern, "[123][123][123]1"), ]  # solo
+inst.2 <- t.data[str_which(t.data$CoordPattern, "[123][123][123]2"), ]  # coll
+inst.3 <- t.data[str_which(t.data$CoordPattern, "[123][123][123]3"), ]  # cont
 ```
 
 ## Function to get important values by dataset
@@ -81,130 +81,8 @@ MakeTECItable <- function(dataset) {
         
 }
 
-
-
+# Print results for rough draft table
 MakeTECItable(inst.3)
 MakeTECItable(inst.2)
 MakeTECItable(inst.1)
-```
-
-## Split by discipline
-```{r}
-# Create subdiscipline datasets and remove rows with NAs
-chem.dat <- t.data[which(t.data$Discipline == 1), ]
-chem.dat <- chem.dat[complete.cases(chem.dat), ]
-table(chem.dat$AcadRank)
-
-math.dat <- t.data[which(t.data$Discipline == 2), ]
-math.dat <- math.dat[complete.cases(math.dat), ]
-table(math.dat$AcadRank)
-
-phys.dat <- t.data[which(t.data$Discipline == 3), ]
-phys.dat <- phys.dat[complete.cases(phys.dat), ]
-table(phys.dat$AcadRank)
-```
-
-
-## Get relative frequencies by y-categories
-Use nested for loops to replace each cell with the appropriate relative frequency given by: (number of instructors of rank i using k teaching style) / (number of instructors in rank i) * 100
-
-Academic Rank - TEST
-```{r}
-rank_counts <- table(chem.dat$AcadRank)  # n respondants per X-axis category (Academic Rank)
-rank_freq <- as.matrix(table(chem.dat$Coord_Cat, chem.dat$AcadRank))  # frequencies of rank (x axis columns) by teaching style (y-axis rows)
-
-
-rank_counts <- table(math.dat$AcadRank)  # n respondants per X-axis category (Academic Rank)
-rank_freq <- as.matrix(table(math.dat$Coord_Cat, math.dat$AcadRank))  # frequencies of rank (x axis columns) by teaching style (y-axis rows)
-
-
-
-
-# Order frequency table by PC1 score
-rank_freq <- rank_freq[, match(Teach_by_PC1, as.numeric(unlist(dimnames(rank_freq)[2][1])))]  # reorder columns (teaching seq) by PC1 score
-
-# Make relative frequency table
-rank_rf <- rank_freq  # initialize relative freq table
-for(i in 1:dim(rank_rf)[1]) {  # for loops to convert frequencies into %s
-        for (k in 1:dim(rank_rf)[2]) {
-                rank_rf[i, k] <- signif(rank_rf[i, k] / rank_counts[i], 2) * 100  # relative frequency as a % with 2 significant digits
-        }
-}
-```
-
-## Plot & export results - RANK
-```{r}
-pdf("../Rank_PC1_plot.pdf")
-
-plot(rep(1:dim(rank_rf)[2], dim(rank_rf)[1]),  # x-values go L-->R, Low-->High
-     c(rep(1, 54), rep(2, 54), rep(3, 54), rep(4, 54), rep(5, 54), rep(6, 54), rep(7, 54)),                            # y-values match the order given above
-     pch = 16,
-     axes = FALSE,
-     main = "Frequency of teaching types by academic rank",
-     xlab = "more solitary <------- more coordinated -------> more controlled",
-     ylab = "Rank",
-     cex = (as.vector(t(rank_rf)) / 10), # rel. freq point sizes match above
-     col = rgb(red = 0, green = 0, blue = 1, alpha = 0.6))  # alpha sets transparency
-
-# Label x-axis by teaching sequence in order of PC1 score
-axis(side = 1, at = c(1:54), labels = PC1_order$CoordPattern, las = 2, cex.axis = 0.5)
-
-# Label y-axis with human-readable labels
-y_labels = c("Prof", "A/Prof", "Asst/P", "Lect.", "Visit.", "Postdoc", "Grad")
-axis(side = 2, at = c(1:7), labels = y_labels, las = 1, cex.axis = 0.75)
-
-# Legend
-freq_labels <- c("1%", "5%", "10%", "25%", paste(max(rank_rf), "%", sep = ""))
-freq_pch <- c(1, 5, 10, 25, max(rank_rf))
-legend("bottomright", freq_labels, col = rgb(0, 0, 1, alpha = 0.6), pch = 16, pt.cex = freq_pch / 10, text.width = 4, text.col = "darkgray", xjust = 1)
-
-dev.off()  # completes export
-```
-
-
-## Get relative frequencies by y-categories - Discipline
-```{r}
-dis_counts <- table(raw$Discipline)  # n respondents per dicipline 
-dis_freq <- table(raw$Discipline, raw$CoordPattern)  # freqs by discipline
-
-# Order frequency table by PC1 score
-dis_freq <- dis_freq[, match(Teach_by_PC1, as.numeric(unlist(dimnames(dis_freq)[2][1])))]  # reorder columns (teaching seq) by PC1 score
-
-# Relative Frequencies
-dis_rf <- dis_freq  # initialize relative frequency table
-for(i in 1:dim(dis_freq)[1]) {  # for loops to convert frequencies into %s
-        for (k in 1:dim(dis_freq)[2]) {
-                dis_rf[i, k] <- signif(dis_rf[i, k] / dis_counts[i], 2) * 100  # relative frequency as a % with 2 significant digits
-        }
-}
-```
-
-## Plot and export
-Discipline
-```{r}
-pdf("../Discipline_PC1_plot.pdf")  # set up for export
-
-plot(rep(1:dim(dis_rf)[2], dim(dis_rf)[1]),  # x-values from L-->R, Low-->High
-     c(rep(1, 54), rep(2, 54), rep(3, 54)),  # y-values match the above
-     pch = 16,
-     axes = FALSE,
-     main = "Frequency of teaching types relative to discipline",
-     xlab = "more solitary <------- more coordinated -------> more controlled",
-     ylab = "Discipline",
-     cex = (as.vector(t(dis_rf)) / 10),  # rel. freq point sizes match above
-     col = rgb(red = 0, green = 0, blue = 1, alpha = 0.6))  # alpha sets transparency)
-
-# Label x-axis by teaching sequence in order of PC1 score
-axis(side = 1, at = c(1:54), labels = PC1_order$CoordPattern, las = 2, cex.axis = 0.5)
-
-# Label y-axis with human-readable labels
-y_labels = c("Chemistry", "Math", "Physics")
-axis(side = 2, at = c(1:3), labels = y_labels, las = 1, cex.axis = 0.75)
-
-# Legend
-freq_labels <- c("1%", "5%", "10%", "25%", paste(max(dis_rf), "%", sep = ""))
-freq_pch <- c(1, 5, 10, 25, max(dis_rf))
-legend("bottomright", freq_labels, col = rgb(0, 0, 1, alpha = 0.6), pch = 16, pt.cex = freq_pch / 10, text.width = 4, text.col = "darkgray", xjust = 1)
-
-dev.off()  # finish export
 ```
