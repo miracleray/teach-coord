@@ -7,14 +7,14 @@ output: html_document
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd("~/Documents/Work/Science/Research/2020 UNL DBER/Co-Teaching")
+setwd("~/Documents/Work/Science/Research/2020 UNL DBER/Co-Teaching/teach-coord/Data/Raw/")
 ```
 
 ## Read in data and packages
 ```{r}
 library(stringr)
 
-raw <- read.csv("SurveyDataDI.csv", header = TRUE)
+raw <- read.csv("~/Documents/Work/Science/Research/2020 UNL DBER/Co-Teaching/teach-coord/Data/Raw/SurveyDataDI.csv", header = TRUE)
 ```
 
 ## Fix Academic Rank to ascend with rank
